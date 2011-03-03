@@ -3,7 +3,7 @@ Contributors: brendaegeland
 Tags: upload, minutes, agendas, newsletters
 Stable tag: trunk
 Requires at least: 3.0.1
-Tested up to: 3.0.4
+Tested up to: 3.1
 
 Upload and manage pdfs of minutes, agendas and newsletters for your organization.
 
