@@ -1,0 +1,20 @@
+/* CSS for minutes_agendas pop-up in editor */
+
+#minagnews_list h2,
+#minagnews_list h3,
+#minagnews_list th,
+#minagnews_list td,
+#minagnews_list p
+ { font-family: Arial, Tahoma, sans-serif; }
+
+#minagnews_list h2 { font-size: 16px; line-height: 20px; padding: 0; margin: 0 0 6px 0; color: #5f6a41; }
+#minagnews_list h3 { font-size: 14px; line-height: 20px; padding: 0; margin: 0 0 6px 0; color: #745800; }
+#minagnews_list p  { font-size: 12px; line-height: 16px; padding: 0; margin: 0 0 6px 0; color: #444444; }
+#minagnews_list a,
+#minagnews_list a:link,
+#minagnews_list a:visited  { color: #46768f; text-decoration: none;}
+#minagnews_list a:hover,
+#minagnews_list a:active  { color: #798e3d; }
+
+table.minagnews_tbl th { text-align: left; font-size: 14px; line-height: 20px; color: #5f6a4a; background-color: #c2cca6;}
+table.minagnews_tbl td { font-size: 12px; line-height: 15px; border-bottom: 1px solid #c2cca6; }
