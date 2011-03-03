@@ -16,6 +16,8 @@ individuals files. The uploaded files are stored in a user-named folder in the u
 and are *not* indexed in the database. This allows users to mass-upload 
 existing files through an ftp program if necessary.
 
+More information can be found at [the plugin website](http://www.redletterdesign.net/wp/minutes-agendas-newsletters/)
+
 = Current Features =
 
 * Upload pdfs of minutes, agendas and newsletters
@@ -37,6 +39,7 @@ existing files through an ftp program if necessary.
 1. Go to Media -> Minutes, Agendas Newsletters to upload files.
 1. Creates link to files in your pages/posts using the button in the Visual Editor, or by shortcode
 1. Create tabular display of uploaded documents in your pages/posts using the button in the Visual Editor, or by shortcode
+1. More information can be found at [the plugin website](http://www.redletterdesign.net/wp/minutes-agendas-newsletters/)
 
 == Screenshots ==
 
