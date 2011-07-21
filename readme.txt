@@ -49,6 +49,11 @@ More information can be found at [the plugin website](http://www.redletterdesign
 4. The Settings page.
 5. Example of table display.
 
+== Frequently Asked Questions ==
+
+= I used the editor button to create a shortcode for a table, but nothing appears =
+
+There is a bug in the shortcode generator that doesn't properly handle slugs with uppercase letters. Either rename your slugs to be lowercase, or manually edit the shortcode with the correct capitalization. Will be fixed in the next release.
 
 == Requirements ==
 
