@@ -55,7 +55,7 @@ More information can be found at [the plugin website](http://www.redletterdesign
 
 Not at this time.
 
-= Can this handle more than one document for a given date for a given document type?
+= Can this handle more than one document for a given date for a given document type? =
 
 Sorry, no. The file naming convention is based on no more than one document per date for each document type. This may change in a future version.
 
@@ -64,13 +64,24 @@ Sorry, no. The file naming convention is based on no more than one document per 
 * PHP 5+
 * WordPress 3.0+
 
-== Version History ==
+== Changelog ==
 
-* 0.2 - 2011-10-11 - Added shortcode options to select only certain years and subsets of document types, and a number of bug fixes.
+= 0.2.1 =
+2011-10-11 - Trying to get this readme file right!
+
+= 0.2 =
+2011-10-11 - Added shortcode options to select only certain years and subsets of document types, and a number of bug fixes.
 Thanks to Ethan Piliavin for finding and correction a problem with document order, and to Tim Carey for ideas on handling shortcode options
 for selecting only certain years.
 
-* 0.1 - 2011-03-02 - Initial development version
+= 0.1 =
+2011-03-02 - Initial development version
+
+== Upgrade Notice ==
+
+= 0.2.1 =
+
+New table shortcode features to select only certain years or document types plus bug fixes.
 
 == More Information ==
 
