@@ -1,7 +1,7 @@
 === Minutes, Agendas, Newsletters ===
 Contributors: brendaegeland
 Tags: upload, minutes, agendas, newsletters
-Stable tag: trunk
+Stable tag: 0.2
 Requires at least: 3.0.1
 Tested up to: 3.1
 
