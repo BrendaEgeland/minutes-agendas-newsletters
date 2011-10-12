@@ -1,5 +1,6 @@
 <?php
-/* 2011-01-25 in year_has_documents, missing braces after if statement caused errors */
+// 2011-01-25 in year_has_documents, missing braces after if statement caused errors
+// 2011-10-11 Use scandir instead of readdir in function parse (thanks Ethan Piliavin)
 
 class MinAgNewsParseUploads {
 
@@ -64,23 +65,26 @@ class MinAgNewsParseUploads {
   // analyze contents of uploads directory
   function parse() {
         
-    if (is_dir($this->uploadsPath) && $handle = opendir($this->uploadsPath)) {
-      while (false !== ($file= readdir($handle))) {
-        // add filename to array if it matches the naming pattern
-        $fileNameOptions = implode('|',array_keys($this->file_types));
-        if (preg_match("/^({$fileNameOptions})_[0-9]{4}\-[0-9]{2}\-[0-9]{2}.pdf$/",$file)) {
-          $s = strpos($file,'_');
-          $fileType = substr($file,0,$s);
-          $docType = $this->file_types[$fileType];
-          $year = substr($file,$s+1,4);
-          $month = substr($file,$s+6,2);
-          $day = substr($file,$s+9,2);
-          $this->documents[$docType][$year][$month][$day] = $file;
-        }
-      }
-      closedir($handle);
-
-    }
+    // 2011-10-11 Thanks to Ethan Piliavin for suggestion to use scandir instead of readdir.
+    // Scandir automatically sorts alphabetically, which is needed here, whereas readdir was 
+    // sorting by file date, which was necessarily the correct order for us if the files were not
+    // uploaded in chronological order
+    
+		if ( $allfiles = scandir($this->uploadsPath) ) { 
+		  foreach ($allfiles as $file) {
+				// add filename to array if it matches the naming pattern
+				$fileNameOptions = implode('|',array_keys($this->file_types));
+				if (preg_match("/^({$fileNameOptions})_[0-9]{4}\-[0-9]{2}\-[0-9]{2}.pdf$/",$file)) {
+				  $s = strpos($file,'_');
+				  $fileType = substr($file,0,$s);
+				  $docType = $this->file_types[$fileType];
+				  $year = substr($file,$s+1,4);
+				  $month = substr($file,$s+6,2);
+				  $day = substr($file,$s+9,2);
+				  $this->documents[$docType][$year][$month][$day] = $file;
+				}
+		  } 
+		}
 
     // Compute if any of each type of document exist, and if any exist at all
     // docs_exist($docType) and any_docs_exist
@@ -122,7 +126,7 @@ class MinAgNewsParseUploads {
     $myarray = $this->documents;
     $has_documents = false;
     foreach ($this->docs_exist as $docType=>$exists) {
-      if ( $exists && ($show=='all'|| $show==$docType) ) {
+      if ( $exists && ($show=='all' || in_array($docType, $show)) ) {
         if (array_key_exists($year,$myarray[$docType])) {
           $has_documents = true;
           break;
@@ -154,8 +158,8 @@ class MinAgNewsParseUploads {
   // Create a table. The passed in string is parsed and used for the td content
   // available parsings:
   // filename
-  function createTable($td_content, $show = 'all', $attributes = array()) {
-  
+  function createTable($td_content, $show = 'all', $year = 'all', $attributes = array()) {
+
     $table = '';
     
     $valid_attributes = array(
@@ -181,85 +185,134 @@ class MinAgNewsParseUploads {
       $attribute_string .= $$vattr;
     }
     
-
-    // create table only if documents exist
+    $docs_to_display = array();    
+    if ($show == 'all') {
+    	foreach ($this->docs_exist as $docType=>$exists) {
+    		if ($exists) {
+    			$docs_to_display[] = $docType;
+    		}
+    	}    	
+    } else {
+     	$show = array_map('trim', explode(',', $show) );
+     	foreach ($show as $s) {
+     		// if the document type exists and has documents...
+     		if (array_key_exists($s, $this->docs_exist) && $this->docs_exist[$s]) {
+     			// add to display array
+     			$docs_to_display[] = $s;
+     		}	
+     	}
+    }
+    $docs_to_display = array_unique($docs_to_display);
     
-    if ($this->documents_exist($show)) {
+    $years_to_display = array();
+    $all_years = range($this->start_year, $this->end_year);
+    $current_year = date('Y');
+    $previous_year = $current_year - 1;
+    if ($year == 'all') {
+    	$years_to_display = $all_years;
+    } else { 
+			$year = array_map('trim', explode(',', $year) );
+			foreach ($year as $y) {
+				// each element of the array could be a year or a range of years
+				if (substr_count($y,'-') == 1) {
+					list($range_start, $range_end) = explode('-', $y);
+					$range_start = (in_array($range_start, $all_years)) ? $range_start : $this->start_year;
+					$range_end = (in_array($range_end, $all_years)) ? $range_end : $this->end_year;
+					if ($range_end >= $range_start) {
+						for ($i=$range_start; $i<=$range_end; $i++) {
+							$years_to_display[] = $i;
+						}
+					}
+				} elseif ('current' == strtolower($y)) {
+					if (in_array($current_year, $all_years)) {
+						$years_to_display[] = $current_year;
+					}
+				} elseif ('previous' == strtolower($y)) {
+					if (in_array($previous_year, $all_years)) {
+						$years_to_display[] = $previous_year;
+					}						
+				} elseif (in_array($y, $all_years)) {
+					$years_to_display[] = $y;
+				}
+			}    	
+    }
+    // clean up in case of duplicates, and order
+    $years_to_display = array_unique($years_to_display);
+    rsort($years_to_display); // put years in descending order
     
-      ob_start();
-      ?>  
+		$documents_listed_count = 0;
+    
 
-      <table <?php echo $attribute_string;?>>
-          <?php
-          for ($year = $this->end_year; $year >= $this->start_year; $year--) {
-            if ($this->year_has_documents($year, $show)) {
-              ?>
-              <thead>
-                <tr>
-                  <th><?php echo $year;?></th>
+    ob_start();
+    ?>  
+
+    <table <?php echo $attribute_string;?>>
+        <?php
+        foreach ($years_to_display as $year) {
+          if ($this->year_has_documents($year, $docs_to_display)) {
+            ?>
+            <thead>
+              <tr>
+                <th><?php echo $year;?></th>
+                <?php
+                foreach ($docs_to_display as $docType) {
+									?>
+                  <th><?php echo $this->document_types[$docType]['title'];?></th>
                   <?php
-                  foreach ($this->docs_exist as $docType=>$exists) {
-                    if ( $exists && ($show=='all' || $show==$docType) ) {
-                      ?>
-                      <th><?php echo $this->document_types[$docType]['title'];?></th>
-                      <?php
-                    }
-                  }
+                }
+                ?>
+              </tr>
+            </thead>
+            <tbody>
+
+            <?php
+            foreach ($this->month_names as $month => $month_name) {
+              $month_has = array();
+              $has_any = false;
+              foreach ($this->document_types as $docType=>$docdef) {
+                if ($month_has[$docType] = $this->month_has_documents($docType, $month, $year)) {
+                  $has_any = true;
+                }
+              }
+              $past = strtotime($year.'-'.$month.'-01') <= strtotime('today');
+              if ($past || $has_any) {
+                ?>
+                <tr>
+                  <td class="row-title"><?php echo $month_name; ?></td>
+                  <?php
+                  foreach ($docs_to_display as $docType) {
+                    ?>
+                    <td><?php
+                      if ($month_has[$docType]) {
+                      	$documents_listed_count++;
+                        foreach ($this->documents[$docType][$year][$month] as $day=>$filename) {
+                          echo $this->interpret($td_content, $filename, $docType, $year, $month, $day);
+                        }   
+                      } else {
+                        echo '&nbsp;';
+                      }
+                    ?>
+                    </td>
+                    <?php
+                  } // for each docType
                   ?>
                 </tr>
-              </thead>
-              <tbody>
+                <?php
+              } // end if there are documents for this month
+            } // end month
+          } // if there are documents for this year
+        } // end year
+    
+        ?>
+      </tbody>
+    </table>    
+    <?php
 
-              <?php
-              foreach ($this->month_names as $month => $month_name) {
-                $month_has = array();
-                $has_any = false;
-                foreach ($this->document_types as $docType=>$docdef) {
-                  if ($month_has[$docType] = $this->month_has_documents($docType, $month, $year)) {
-                    $has_any = true;
-                  }
-                }
-                $past = strtotime($year.'-'.$month.'-01') <= strtotime('today');
-                if ($past || $has_any) {
-                  ?>
-                  <tr>
-                    <td class="row-title"><?php echo $month_name; ?></td>
-                    <?php
-                    foreach ($this->docs_exist as $docType=>$exists) {
-                      if ( $exists && ($show=='all' || $show==$docType) ){
-                        ?>
-                        <td><?php
-                          if ($month_has[$docType]) {
-                            foreach ($this->documents[$docType][$year][$month] as $day=>$filename) {
-                              echo $this->interpret($td_content, $filename, $docType, $year, $month, $day);
-                            }   
-                          } else {
-                            echo '&nbsp;';
-                          }
-                        ?>
-                        </td>
-                        <?php
-                      } // if docs exists for this type
-                    } // for each docType
-                    ?>
-                  </tr>
-                  <?php
-                } // end if there are documents for this month
-              } // end month
-            } // if there are documents for this year
-          } // end year
+    $table = ob_get_contents();
+    ob_end_clean();
       
-          ?>
-        </tbody>
-      </table>    
-      <?php
-  
-      $table = ob_get_contents();
-      ob_end_clean();
-      
-    } // end if documents exist
-    else {
-      $table = "<p>Didn't find anything for show = $show .</p>";
+    if ($documents_listed_count == 0) {
+      $table = "<p>No documents found.</p>" ;
     }
     
     return $table;
@@ -268,7 +321,7 @@ class MinAgNewsParseUploads {
   
   function interpret ($pattern, $filename, $docType, $year, $month, $day) {
     // Interprets the possible codes in the pattern
-    // We interpret 'display' first as in my contain the other strings
+    // We interpret 'display' first as it may contain the other strings
     
 
     $pattern = str_ireplace('[[[display]]]', $this->document_types[$docType]['display'], $pattern);

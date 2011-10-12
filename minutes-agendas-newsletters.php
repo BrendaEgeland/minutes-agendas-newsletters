@@ -29,6 +29,7 @@ Using
 Version History
 
 0.1 2011-1-7 Initial development
+0.2 2011-10-11 Add shortcode options, fix bugs
 
 /*
 
@@ -213,9 +214,9 @@ if ( !class_exists( 'MinutesAgendasNewsletters' ) ) {
         // check for errors in changed data
         foreach ($_POST['doc'] as $docType=>$settings) {
           // is slug okay?
-          if (!preg_match('/^[a-zA-Z0-9_\-]+$/',$settings['slug'])) {
+          if (!preg_match('/^[a-z0-9_\-]+$/',$settings['slug'])) {
             $errors = true;
-            $doc_type_results[] = "{$settings['slug']} is an invalid value.";
+            $doc_type_results[] = "{$settings['slug']} is an invalid value. Must be lowercase alphanumeric; may include - or _.";
             $display['doc'][$docType]['slug']['error'] = true;
           }
           if ( ($settings['slug'] != $docType)
@@ -227,7 +228,7 @@ if ( !class_exists( 'MinutesAgendasNewsletters' ) ) {
           // is file prefix okay?
           if (!preg_match('/^[a-zA-Z0-9_\-]+$/',$settings['file_prefix'])) {
             $errors = true;
-            $doc_type_results[] = "{$settings['file_prefix']} is an invalid value.";
+            $doc_type_results[] = "{$settings['file_prefix']} is an invalid value. Must be alphanumeric; may include - or _.";
             $display['doc'][$docType]['file_prefix']['value'] = $settings['file_prefix'];
             $display['doc'][$docType]['file_prefix']['error'] = true;
           }
@@ -243,9 +244,9 @@ if ( !class_exists( 'MinutesAgendasNewsletters' ) ) {
         // check added type for errors 
         if (isset($_POST['_ADD']) && !empty($_POST['_ADD']['slug'])) {
           // is slug okay?
-          if (!preg_match('/^[a-zA-Z0-9_\-]+$/',$_POST['_ADD']['slug'])) {
+          if (!preg_match('/^[a-z0-9_\-]+$/',$_POST['_ADD']['slug'])) {
             $errors = true;
-            $doc_type_results[] = "{$_POST['_ADD']['slug']} is an invalid value.";
+            $doc_type_results[] = "{$_POST['_ADD']['slug']} is an invalid value. Must be lowercase alphanumeric; may include - or _.";
             $display['_ADD']['slug']['error'] = true;
           }
           if (array_key_exists($_POST['_ADD']['slug'], $document_types)) {
@@ -261,7 +262,7 @@ if ( !class_exists( 'MinutesAgendasNewsletters' ) ) {
           }
           if (!preg_match('/^[a-zA-Z0-9_\-]+$/',$_POST['_ADD']['file_prefix'])) {
             $errors = true;
-            $doc_type_results[] = "{$_POST['_ADD']['file_prefix']} is an invalid value.";
+            $doc_type_results[] = "{$_POST['_ADD']['file_prefix']} is an invalid value. Must be alphanumeric; may include - or _.";
             $display['_ADD']['file_prefix']['error'] = true;
           }
           if (in_array(strtolower($_POST['_ADD']['file_prefix']), $file_prefixes)) {
@@ -310,8 +311,12 @@ if ( !class_exists( 'MinutesAgendasNewsletters' ) ) {
             $display['doc'][$new_slug]['display']['error'] = false;
             if (empty($_POST['_ADD']['date_format'])) {
               $document_types[$new_slug]['date_format'] = "F j, Y";
+              $display['doc'][$new_slug]['date_format']['value'] = $document_types[$new_slug]['date_format'];
+              $display['doc'][$new_slug]['date_format']['error'] = false;
             } else {
-              $document_types[$new_slug]['date_format'] = htmlspecialchars($_POST['_ADD']['display']);
+              $document_types[$new_slug]['date_format'] = htmlspecialchars($_POST['_ADD']['date_format']);
+              $display['doc'][$new_slug]['date_format']['value'] =  $document_types[$new_slug]['date_format'];
+              $display['doc'][$new_slug]['date_format']['error'] = false;
             }
             $display['doc'][$new_slug]['display']['value'] = $document_types[$new_slug]['display'];
             $display['doc'][$new_slug]['display']['error'] = false;
@@ -320,11 +325,11 @@ if ( !class_exists( 'MinutesAgendasNewsletters' ) ) {
             $display['doc'][$new_slug]['file_prefix']['error'] = false;
             $doc_type_results[] = "Added document type $new_slug";
             // Clear out $display['_ADD']
-            $display['_ADD']['slug'] = array('value' => $docType, 'error' => false);
-            $display['_ADD']['title'] = array('value' => $docDef['title'], 'error' => false);
-            $display['_ADD']['display'] = array('value' => $docDef['display'], 'error' => false);
-            $display['_ADD']['date_format'] = array('value' => $docDef['date_format'], 'error' => false);
-            $display['_ADD']['file_prefix'] = array('value' => $docDef['file_prefix'], 'error' => false);
+            $display['_ADD']['slug'] = array('value' => '', 'error' => false);
+            $display['_ADD']['title'] = array('value' => '', 'error' => false);
+            $display['_ADD']['display'] = array('value' => '', 'error' => false);
+            $display['_ADD']['date_format'] = array('value' => '', 'error' => false);
+            $display['_ADD']['file_prefix'] = array('value' =>'', 'error' => false);
           }
           // Change document types
           foreach ($_POST['doc'] as $docType=>$settings) {
@@ -488,7 +493,7 @@ if ( !class_exists( 'MinutesAgendasNewsletters' ) ) {
           
           <p>Each document needs the following information:</p>
           <ul>
-            <li><strong>slug</strong> - used internally to identify the document type. Must be alphanumeric (may include -and _ ) and must be unique.</li>
+            <li><strong>slug</strong> - used internally to identify the document type. Must be lowercase alphanumeric (may include -and _ ) and must be unique.</li>
             <li><strong>title</strong> - when displaying a table or a form option, the title is used to represent the document type (e.g., a column heading).</li>
             <li><strong>link format</strong> - when a link to a document is made, it is formatted with this text. Certain codes will be replaced with the
               values appropriate to that document:
@@ -663,7 +668,7 @@ if ( !class_exists( 'MinutesAgendasNewsletters' ) ) {
           <form method="post" action="<?php echo $_SERVER["REQUEST_URI"]; ?>">
           <?php
           $td_content = '<div><input type="checkbox" name="delete[]" value="[[[filename]]]" /> <a href="'. $uploadsURL. '/[[[filename]]]">[[[filename]]]</a></div>';
-          echo $u->createTable($td_content,'all',array('class'=>'widefat'));
+          echo $u->createTable($td_content,'all','all',array('class'=>'widefat'));
           ?>  
           <div class="submit">
             <input class="button-primary" type="submit" name="delete_documents" value="<?php echo 'Delete checked documents'; ?>" />
@@ -685,6 +690,7 @@ if ( !class_exists( 'MinutesAgendasNewsletters' ) ) {
       
       $attributes = shortcode_atts(array(
       	  'show' => 'all',
+      	  'year' => 'all',
       	  'id' => '',
       	  'class' => 'minagnews_tbl',
       	  'width' => '100%',
@@ -693,6 +699,7 @@ if ( !class_exists( 'MinutesAgendasNewsletters' ) ) {
       	  'attr' => ''
           ), $atts);
       $show = $attributes['show'];
+      $year = $attributes['year'];
           
        // Parse the directory of existing documents
       require_once('minagnews-parse-uploads.php');
@@ -704,14 +711,10 @@ if ( !class_exists( 'MinutesAgendasNewsletters' ) ) {
       $uploadsURL = $uploads['baseurl'] . "/$uploadsDir";
       $u = new MinAgNewsParseUploads($uploadsPath, $document_types);
 
-      // If 'show' is not 'all', check that the document type is valid
-      if ($show == 'all' || $u->is_valid_document_type($show)) {
-        $u->parse();     
-        $td_content = '<a href="'. $uploadsURL. '/[[[filename]]]">[[[display]]]</a>';    
-        return $u->createTable($td_content, $show, $attributes);
-      } else {
-        return ''; // fail gracefully by returning nothing
-      }
+      $u->parse();     
+      $td_content = '<a href="'. $uploadsURL. '/[[[filename]]]">[[[display]]]</a>';  
+
+      return $u->createTable($td_content, $show, $year, $attributes);
       
     } // end function minagnews_table_shortcode
 

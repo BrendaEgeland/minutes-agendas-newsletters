@@ -51,9 +51,13 @@ More information can be found at [the plugin website](http://www.redletterdesign
 
 == Frequently Asked Questions ==
 
-= I used the editor button to create a shortcode for a table, but nothing appears =
+= Can this handle something other than pdf documents? =
 
-There is a bug in the shortcode generator that doesn't properly handle slugs with uppercase letters. Either rename your slugs to be lowercase, or manually edit the shortcode with the correct capitalization. Will be fixed in the next release.
+Not at this time.
+
+= Can this handle more than one document for a given date for a given document type?
+
+Sorry, no. The file naming convention is based on no more than one document per date for each document type. This may change in a future version.
 
 == Requirements ==
 
@@ -61,6 +65,10 @@ There is a bug in the shortcode generator that doesn't properly handle slugs wit
 * WordPress 3.0+
 
 == Version History ==
+
+* 0.2 - 2011-10-11 - Added shortcode options to select only certain years and subsets of document types, and a number of bug fixes.
+Thanks to Ethan Piliavin for finding and correction a problem with document order, and to Tim Carey for ideas on handling shortcode options
+for selecting only certain years.
 
 * 0.1 - 2011-03-02 - Initial development version
 

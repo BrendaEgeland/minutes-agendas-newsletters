@@ -56,20 +56,54 @@ function insertDocLink(elem){
 function insertTableShortcode(){
 
 	  var ed = tinyMCEPopup.editor, dom = ed.dom, se = ed.selection;
+
+    var showOpts = new Array();
     showOption = '';
-    
-    for( i = 0; i < document.insertTableForm.docType.length; i++ ) {
-      if( document.insertTableForm.docType[i].checked == true ) {
-        showOption = document.insertTableForm.docType[i].value;
-        break;
+    if ( true || document.insertTableForm.docType) {
+      for( i = 0; i < document.insertTableForm.docType.length; i++ ) {
+        if( document.insertTableForm.docType[i].checked == true ) {
+          thisDocType = document.insertTableForm.docType[i].value;
+          if (thisDocType == 'all') {
+            showOption = 'all';
+            break;
+          }
+          showOpts.push( document.insertTableForm.docType[i].value);
+        }
       }
+      if (showOption != 'all') {
+        showOption = showOpts.toString();
+        if (showOption == '') {
+          showOption = 'all';
+        }
+      }
+    } else {
+      showOption = 'all';
     }
     
-    if (showOption == '') {
-        showOption = 'All';
+    var yearOpts = new Array();
+    yearOption = '';
+    if (true || document.insertTableForm.year != 'undefined') {
+      for( i = 0; i < document.insertTableForm.year.length; i++ ) {
+        if( document.insertTableForm.year[i].checked == true ) {
+          thisYear = document.insertTableForm.year[i].value;
+          if (thisYear == 'all') {
+            yearOption = 'all';
+            break;
+          }
+          yearOpts.push( document.insertTableForm.year[i].value);
+        }
+      }
+      if (yearOption != 'all') {
+        yearOption = yearOpts.toString();
+        if (yearOption == '') {
+          yearOption = 'all';
+        }
+      }
+    } else {
+      yearOption = 'all';
     }
     
-    shortcode = '[minagnews-table show='+showOption.toLowerCase()+'] '
+    shortcode = '[minagnews-table show='+showOption.toLowerCase()+' year='+yearOption.toLowerCase()+'] ';
     se.setContent(shortcode);
     
     tinyMCEPopup.close();

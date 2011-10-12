@@ -43,20 +43,52 @@ function insertTableShortcode(){
 
 	  
 	  var winder = window.top;	
+    var opts = new Array();
+
     showOption = '';
     
     for( i = 0; i < document.insertTableForm.docType.length; i++ ) {
       if( document.insertTableForm.docType[i].checked == true ) {
-        showOption = document.insertTableForm.docType[i].value;
-        break;
+        thisDocType = document.insertTableForm.docType[i].value;
+        if (thisDocType == 'all') {
+          showOption = 'all';
+          break;
+        }
+        opts.push( document.insertTableForm.docType[i].value);
+      }
+    }
+
+    if (showOption != 'all') {
+      showOption = opts.toString();
+      if (showOption == '') {
+        showOption = 'all';
       }
     }
     
-    if (showOption == '') {
-        showOption = 'All';
+    var yearOpts = new Array();
+    yearOption = '';
+    if (true || document.insertTableForm.year != 'undefined') {
+      for( i = 0; i < document.insertTableForm.year.length; i++ ) {
+        if( document.insertTableForm.year[i].checked == true ) {
+          thisYear = document.insertTableForm.year[i].value;
+          if (thisYear == 'all') {
+            yearOption = 'all';
+            break;
+          }
+          yearOpts.push( document.insertTableForm.year[i].value);
+        }
+      }
+      if (yearOption != 'all') {
+        yearOption = yearOpts.toString();
+        if (yearOption == '') {
+          yearOption = 'all';
+        }
+      }
+    } else {
+      yearOption = 'all';
     }
     
-    shortcode = '[minagnews-table show='+showOption.toLowerCase()+'] '
+    shortcode = '[minagnews-table show='+showOption.toLowerCase()+' year='+yearOption.toLowerCase()+'] ';
     
     
     winder.edInsertContent(winder.edCanvas, shortcode);
