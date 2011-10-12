@@ -4,7 +4,7 @@
 Plugin Name: Minutes, Agendas and Newsletters
 Plugin URI: http://www.redletterdesign.net/wp/minutes_agendas_newsletters
 Description: Easily upload monthly minutes and agendas that are in pdf format. Provides shortcodes for individual documents and creating an overall listing.
-Version: 0.1
+Version: 0.2.1
 Author: Brenda Egeland
 Author URI: http://www.redletterdesign.net/
 */
@@ -30,6 +30,7 @@ Version History
 
 0.1 2011-1-7 Initial development
 0.2 2011-10-11 Add shortcode options, fix bugs
+0.2.1 2011-10-11 Fixes to readme file.
 
 /*
 
