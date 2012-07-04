@@ -289,7 +289,7 @@ class MinAgNewsParseUploads {
             foreach ($months_in_order as $month => $month_name) {
               $month_has = array();
               $has_any = false;
-              foreach ($this->document_types as $docType=>$docdef) {
+              foreach ($docs_to_display as $docType) {
                 if ($month_has[$docType] = $this->month_has_documents($docType, $month, $year)) {
                   $has_any = true;
                 }

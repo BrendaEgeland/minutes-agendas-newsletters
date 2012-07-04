@@ -32,6 +32,7 @@ Version History
 0.2 2011-10-11 Add shortcode options, fix bugs
 0.2.1 2011-10-11 Fixes to readme file.
 1.0.0 2012-07-03 Added new options to shortcodes. Some general code cleanup.
+1.0.1 2012-07-04 Fixed error in omit_empty=true case where only some document types were being displayed.
 
 /*
 

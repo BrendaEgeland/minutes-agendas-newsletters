@@ -1,7 +1,7 @@
 === Minutes, Agendas, Newsletters ===
 Contributors: brendaegeland
 Tags: upload, minutes, agendas, newsletters
-Stable tag: 1.0.0
+Stable tag: 1.0.1
 Requires at least: 3.0.1
 Tested up to: 3.4.1
 License: GPLv2 or later
@@ -117,6 +117,9 @@ You can do this via CSS in your style.css file, e.g., table.minagnews_tbl td a {
 * WordPress 3.0+
 
 == Changelog ==
+
+= 1.0.1 =
+2012-07-04 Fixed error in omit_empty=true case where only some document types were being displayed.
 
 = 1.0.0 =
 2012-07-04 - New features for shortcodes. Some general code cleanup.
