@@ -1,9 +1,11 @@
 === Minutes, Agendas, Newsletters ===
 Contributors: brendaegeland
 Tags: upload, minutes, agendas, newsletters
-Stable tag: 0.2.1
+Stable tag: 1.0.0
 Requires at least: 3.0.1
-Tested up to: 3.1
+Tested up to: 3.4.1
+License: GPLv2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
 Upload and manage pdfs of minutes, agendas and newsletters for your organization.
 
@@ -23,6 +25,48 @@ More information can be found at [the plugin website](http://www.redletterdesign
 * Upload pdfs of minutes, agendas and newsletters
 * Display a table of minutes, agendas and/or newsletters by month and year
 * Link to individual files
+
+= Shortcodes =
+
+[minagnews-table show="show-value" months_order="ASC|DESC" omit_empty=false|true id="id" class="class" attr="attr"]
+
+*	__show__: which types of documents to show, defined by the 'slug' for each document type in the plugin settings, or 'all' for all document types. For multiple document types, use a comma separated list (e.g., show=minutes,agendas).
+
+*	__months_order__: within a given year in the table, show the months in ascending order (ASC) or descending order (DESC)
+
+*	__omit_empty__: if a month in a given year has no documents, should that month be omitted from the table? Defaults to false.
+
+*	__year__: which years to display. You can enter a specific year, a comma-separated list of years, a range, or use the keywords 'current' for the current year or 'previous' for the previous year. Valid examples:year=2008
+
+	year=2005-2009
+
+	year=2005,2007,2011
+
+	year=2004,2007-2008
+	
+	year=current
+	
+	year=previous,current
+ 	
+	year=all
+	
+*	__id__: the id to be applied to the table
+
+*	__class__: the class to be applied to the table, default is minagnews_tbl
+
+*	__attr__: additional attributes to be applied, e.g., "width='100%'". This string will be added as is to the table tag. The table defaults to cellspacing='0' cellpadding='4' width='100%' unless overridden with attr="attr"
+
+[minagnews-link doctype="doctype" date="date" id="id" class="class" ]
+
+* __doctype__: the document type slug, as specified in the plugin settings
+
+* __date__: the date of the document, e.g., 2012-04-12, or 'latest' for the most current document of the given type
+
+* __id__: id to be applied to the link
+
+*	__class__: class to be applied to the link
+
+If invalid data is provided in the shortcode, a link will not be created. However, the document does not need to exist in order for the shortcode to be created (unless 'latest' is selected as the date).
 
 == Installation ==
 
@@ -57,7 +101,15 @@ Not at this time.
 
 = Can this handle more than one document for a given date for a given document type? =
 
-Sorry, no. The file naming convention is based on no more than one document per date for each document type. This may change in a future version.
+Sorry, no. The file naming convention is based on no more than one document per date for each document type.
+
+= Can I change how the table looks? I don't like the headings, etc. =
+
+These are all controlled by CSS. The default class for the table is minagnews_tbl.
+
+= The links for documents within the same month should be on separate lines. =
+
+You can do this via CSS in your style.css file, e.g., table.minagnews_tbl td a { display: block; }
 
 == Requirements ==
 
@@ -65,6 +117,9 @@ Sorry, no. The file naming convention is based on no more than one document per 
 * WordPress 3.0+
 
 == Changelog ==
+
+= 1.0.0 =
+2012-07-04 - New features for shortcodes. Some general code cleanup.
 
 = 0.2.1 =
 2011-10-11 - Trying to get this readme file right!

@@ -21,12 +21,18 @@ class MinAgNewsParseUploads {
   var $end_year;
   
   var $month_names = array(
-        '01'=>'January', '02'=>'February', '03'=>'March',
-        '04'=>'April', '05'=>'May', '06'=>'June',
-        '07'=>'July', '08'=>'August', '09'=>'September',
-        '10'=>'October','11'=>'November','12'=>'December'
+       '01' =>'January', '02' =>'February', '03'=>'March',
+       '04' =>'April',   '05' =>'May',      '06'=>'June',
+       '07' =>'July',    '08' =>'August',   '09'=>'September',
+       '10' =>'October', '11' =>'November', '12'=>'December'
       );
   
+  var $reverse_month_names = array(
+      '12'=>'December',  '11' =>'November', '10' =>'October',           
+      '09'=>'September', '08' =>'August',   '07' =>'July',              
+      '06'=>'June',      '05' =>'May',      '04' =>'April',             
+      '03'=>'March',     '02' =>'February', '01' =>'January'
+      );  
   
   function __construct($uploadsPath = null, $document_types = array() ) {
     
@@ -70,7 +76,7 @@ class MinAgNewsParseUploads {
     // sorting by file date, which was necessarily the correct order for us if the files were not
     // uploaded in chronological order
     
-		if ( $allfiles = scandir($this->uploadsPath) ) { 
+		if ( $allfiles = @scandir($this->uploadsPath) ) { 
 		  foreach ($allfiles as $file) {
 				// add filename to array if it matches the naming pattern
 				$fileNameOptions = implode('|',array_keys($this->file_types));
@@ -84,6 +90,9 @@ class MinAgNewsParseUploads {
 				  $this->documents[$docType][$year][$month][$day] = $file;
 				}
 		  } 
+		} else {
+		  echo 'Warning: documents folder could not be read. Check permissions.';
+		  
 		}
 
     // Compute if any of each type of document exist, and if any exist at all
@@ -96,14 +105,17 @@ class MinAgNewsParseUploads {
     }
 
     // Find the earliest and latest start/end years
-    $this->start_year = 999999;
-    $this->end_year = 0;
-    foreach ($this->docs_exist as $docType=>$exists) {
-      if ($exists) {
-        $this->start_year = min( min(array_keys($this->documents[$docType])), $this->start_year);
-        $this->end_year   = max( max(array_keys($this->documents[$docType])), $this->end_year);
+    if ($this->any_documents_exist) {
+      $this->start_year = 999999;
+      $this->end_year = 0;
+      foreach ($this->docs_exist as $docType=>$exists) {
+        if ($exists) {
+          $this->start_year = min( min(array_keys($this->documents[$docType])), $this->start_year);
+          $this->end_year   = max( max(array_keys($this->documents[$docType])), $this->end_year);
+        }
       }
-    }    
+    }
+    
     return;
 
   } // end function parse
@@ -158,20 +170,27 @@ class MinAgNewsParseUploads {
   // Create a table. The passed in string is parsed and used for the td content
   // available parsings:
   // filename
-  function createTable($td_content, $show = 'all', $year = 'all', $attributes = array()) {
+  function createTable($td_content, $show = 'all', $year = 'all', $attributes = array(), $months_order='ASC', $omit_empty=false) {
 
     $table = '';
     
     $valid_attributes = array(
-      'id'          => '',
-      'class'       => 'minagnews_tbl',
-      'width'       => '100%',
-      'cellpadding' => '4',
-      'cellspacing' => '0',
-      'attr'        => ''
+      'id'           => '',
+      'class'        => 'minagnews_tbl',
+      'width'        => '100%',
+      'cellpadding'  => '4',
+      'cellspacing'  => '0',
+      'attr'         => ''
 
     );
     
+
+    if (!$this->any_documents_exist) {
+      $table = '<p>No documents exist.</p>';
+      return $table;
+    }
+
+    // Parse the html attributed for the table and create strings as needed
     $attribute_string = '';
     foreach ($valid_attributes as $vattr=>$default) {
       if (array_key_exists($vattr, $attributes)) {
@@ -184,7 +203,7 @@ class MinAgNewsParseUploads {
       }
       $attribute_string .= $$vattr;
     }
-    
+
     $docs_to_display = array();    
     if ($show == 'all') {
     	foreach ($this->docs_exist as $docType=>$exists) {
@@ -266,7 +285,8 @@ class MinAgNewsParseUploads {
             <tbody>
 
             <?php
-            foreach ($this->month_names as $month => $month_name) {
+            $months_in_order = ($months_order == 'ASC') ? $this->month_names : $this->reverse_month_names;
+            foreach ($months_in_order as $month => $month_name) {
               $month_has = array();
               $has_any = false;
               foreach ($this->document_types as $docType=>$docdef) {
@@ -275,7 +295,8 @@ class MinAgNewsParseUploads {
                 }
               }
               $past = strtotime($year.'-'.$month.'-01') <= strtotime('today');
-              if ($past || $has_any) {
+              $show_this_month_row = ($omit_empty) ? $has_any : ($past || $has_any);
+              if ($show_this_month_row) {
                 ?>
                 <tr>
                   <td class="row-title"><?php echo $month_name; ?></td>
@@ -353,6 +374,19 @@ class MinAgNewsParseUploads {
       $filename = $file_prefix . '_' . date('Y-m-d', strtotime($date)) . '.pdf';
     }
     return $filename;
+  }
+  
+  // find latest document date for a given doctype
+  function latestDocumentDate($docType) {
+    $date = false;
+    if (array_key_exists($docType, $this->docs_exist) && $this->docs_exist[$docType]) {
+      $latest_year  = max(array_keys($this->documents[$docType]));
+      $latest_month = max(array_keys($this->documents[$docType][$latest_year]));
+      $latest_day   = max(array_keys($this->documents[$docType][$latest_year][$latest_month]));
+      $date = $latest_year . '-' . $latest_month . '-' . $latest_day;
+    }
+    return $date;
+
   }
 
   
